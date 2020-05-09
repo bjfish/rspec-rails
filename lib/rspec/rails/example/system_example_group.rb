@@ -102,6 +102,7 @@ module RSpec
 
         before do
           @routes = ::Rails.application.routes
+          default_url_options.merge!(host: Capybara.app_host)
         end
 
         after do
