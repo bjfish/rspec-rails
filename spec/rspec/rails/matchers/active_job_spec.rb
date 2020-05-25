@@ -49,6 +49,8 @@ RSpec.describe "ActiveJob matchers", skip: !RSpec::Rails::FeatureCheck.has_activ
 
   let(:hello_job) do
     Class.new(ActiveJob::Base) do
+      def perform_in_five
+      end
       def perform(*)
       end
       def self.name; "HelloJob"; end
@@ -221,6 +223,14 @@ RSpec.describe "ActiveJob matchers", skip: !RSpec::Rails::FeatureCheck.has_activ
       expect {
         hello_job.set(wait_until: time).perform_later
       }.to have_enqueued_job.at(time)
+    end
+
+    it "works with time offsets", skip: !defined?(ActiveSupport::Testing::TimeHelpers) do
+      class_eval { include ActiveSupport::Testing::TimeHelpers }
+      freeze_time do
+        time = Time.current
+        expect { hello_job.set(wait: 5).perform_later }.to have_enqueued_job.at(time + 5)
+      end
     end
 
     it "accepts composable matchers as an at date" do
